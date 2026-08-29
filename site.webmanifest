@@ -8,7 +8,7 @@
   "theme_color": "#701116",
   "icons": [
     {
-      "src": "/logo-net-elo.svg",
+      "src": "/logo-net-elo.webp",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
