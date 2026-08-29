@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" role="img" aria-labelledby="t d">
+<title id="t">Entretien du domicile</title><desc id="d">Intérieur lumineux et soigné avec matériel d'entretien discret.</desc>
+<defs><linearGradient id="bg" x1="0" x2="1"><stop stop-color="#fffaf5"/><stop offset="1" stop-color="#f4e6d8"/></linearGradient><filter id="s"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#7a4b3b" flood-opacity=".12"/></filter></defs>
+<rect width="900" height="300" rx="30" fill="url(#bg)"/>
+<rect x="60" y="54" width="250" height="150" rx="10" fill="#fff" opacity=".92"/><rect x="76" y="70" width="218" height="118" fill="#f7eee7"/>
+<path d="M185 70v118M76 129h218" stroke="#ead8c8" stroke-width="4"/>
+<circle cx="145" cy="115" r="22" fill="#d8b989"/><path d="M145 90c-4-28 22-41 38-52M145 92c-26-17-44-5-58 10" fill="none" stroke="#87986a" stroke-width="7" stroke-linecap="round"/>
+<rect x="345" y="125" width="330" height="92" rx="28" fill="#efe0d3" filter="url(#s)"/><rect x="370" y="98" width="92" height="70" rx="22" fill="#f8f2ec"/><rect x="480" y="98" width="92" height="70" rx="22" fill="#f6ece3"/><rect x="594" y="99" width="58" height="68" rx="18" fill="#f8f2ec"/>
+<rect x="330" y="210" width="365" height="16" rx="8" fill="#c99b66"/>
+<g transform="translate(715 92)"><rect x="0" y="48" width="55" height="74" rx="12" fill="#ffffff" stroke="#d9c3b0" stroke-width="3"/><path d="M14 48V30h29v18" fill="none" stroke="#701116" stroke-width="5"/><path d="M23 30V17h18" fill="none" stroke="#701116" stroke-width="5" stroke-linecap="round"/><rect x="71" y="67" width="55" height="55" rx="14" fill="#f0d9c5"/><path d="M82 79h33M82 91h27M82 103h31" stroke="#fff" stroke-width="5" stroke-linecap="round"/></g>
+<ellipse cx="474" cy="252" rx="350" ry="22" fill="#ead9c8" opacity=".45"/>
+</svg>
