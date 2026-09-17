@@ -1,0 +1,98 @@
+name: Integrate structured data
+
+on:
+  push:
+    paths:
+      - '.github/workflows/integrate-structured-data.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Add page-specific JSON-LD
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, re, html
+
+          business={"@id":"https://net-elo.fr/#business"}
+          area=[{"@type":"City","name":x} for x in ["Clermont","Fitz-James","Agnetz","Breuil-le-Sec","Breuil-le-Vert","Neuilly-sous-Clermont","Bailleval","Nointel","Cambronne-lès-Clermont"]]
+
+          services={
+            "aide-menagere.html": {
+              "@context":"https://schema.org","@type":"Service","@id":"https://net-elo.fr/aide-menagere.html#service",
+              "name":"Aide ménagère à domicile à Clermont et alentours",
+              "serviceType":"Entretien du domicile et aide ménagère",
+              "url":"https://net-elo.fr/aide-menagere.html","provider":business,"areaServed":area,
+              "description":"Entretien régulier ou ponctuel du domicile à Clermont et alentours.",
+              "offers":[
+                {"@type":"Offer","name":"Entretien régulier","price":"25","priceCurrency":"EUR","url":"https://net-elo.fr/aide-menagere.html"},
+                {"@type":"Offer","name":"Prestation ponctuelle","price":"28","priceCurrency":"EUR","url":"https://net-elo.fr/aide-menagere.html"}
+              ]
+            },
+            "vitres.html": {
+              "@context":"https://schema.org","@type":"Service","@id":"https://net-elo.fr/vitres.html#service",
+              "name":"Lavage de vitres à domicile à Clermont et alentours",
+              "serviceType":"Lavage de vitres à domicile",
+              "url":"https://net-elo.fr/vitres.html","provider":business,"areaServed":area,
+              "description":"Lavage de vitres à domicile à Clermont et alentours, sur devis.",
+              "offers":{"@type":"Offer","name":"Lavage de vitres","price":"30","priceCurrency":"EUR","description":"Forfait à partir de 30 €, sur devis.","url":"https://net-elo.fr/vitres.html"}
+            },
+            "sap.html": {
+              "@context":"https://schema.org","@type":"Service","@id":"https://net-elo.fr/sap.html#service",
+              "name":"Services à la personne – entretien du domicile",
+              "serviceType":"Entretien du domicile dans le cadre des services à la personne",
+              "url":"https://net-elo.fr/sap.html","provider":business,"areaServed":area,
+              "description":"Prestations d'entretien du domicile relevant des services à la personne, avec crédit d'impôt de 50 % sous conditions."
+            }
+          }
+
+          def inject(path, data, marker):
+              p=Path(path); s=p.read_text(encoding='utf-8')
+              if marker in s: return False
+              payload=json.dumps(data,ensure_ascii=False,indent=2)
+              block=f'\n<script type="application/ld+json" id="{marker}">\n{payload}\n</script>\n'
+              s=s.replace('</head>',block+'</head>',1)
+              p.write_text(s,encoding='utf-8')
+              return True
+
+          changed=False
+          for path,data in services.items():
+              changed |= inject(path,data,'net-elo-page-schema')
+
+          # FAQPage: derive questions and answers from visible HTML when the page uses <details>/<summary>.
+          p=Path('faq.html'); s=p.read_text(encoding='utf-8')
+          if 'id="net-elo-faq-schema"' not in s:
+              pairs=[]
+              for m in re.finditer(r'<details[^>]*>\s*<summary[^>]*>(.*?)</summary>(.*?)</details>',s,re.I|re.S):
+                  q=re.sub(r'<[^>]+>',' ',m.group(1))
+                  a=re.sub(r'<[^>]+>',' ',m.group(2))
+                  clean=lambda x: html.unescape(re.sub(r'\s+',' ',x)).strip()
+                  q,a=clean(q),clean(a)
+                  if q and a: pairs.append((q,a))
+              if pairs:
+                  data={"@context":"https://schema.org","@type":"FAQPage","@id":"https://net-elo.fr/faq.html#faq","url":"https://net-elo.fr/faq.html","mainEntity":[{"@type":"Question","name":q,"acceptedAnswer":{"@type":"Answer","text":a}} for q,a in pairs]}
+                  changed |= inject('faq.html',data,'net-elo-faq-schema')
+
+          # Refresh lastmod only for pages actually touched by this integration.
+          sp=Path('sitemap.xml'); sm=sp.read_text(encoding='utf-8')
+          for url in ['aide-menagere.html','vitres.html','sap.html','faq.html']:
+              sm=re.sub(rf'(<loc>https://net-elo\.fr/{re.escape(url)}</loc><lastmod>)[^<]+',rf'\g<1>2026-09-17',sm)
+          sp.write_text(sm,encoding='utf-8')
+          PY
+      - name: Commit generated markup
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name "Net Elo SEO automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add aide-menagere.html vitres.html sap.html faq.html sitemap.xml
+          git commit -m "SEO: add page-specific structured data"
+          git push
