@@ -1,0 +1,35 @@
+name: IndexNow
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.html'
+      - 'sitemap.xml'
+      - 'llms.txt'
+permissions:
+  contents: read
+jobs:
+  notify:
+    if: github.actor != 'github-pages[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 2}
+      - name: Notify IndexNow of changed public URLs
+        env:
+          KEY: 3f7b9d8c2e6a4f10b5c1d9e7a3f6b2c8
+        run: |
+          python - <<'PY' > /tmp/payload.json
+          import json,subprocess,os
+          out=subprocess.check_output(['git','diff','--name-only','HEAD^','HEAD'],text=True).splitlines()
+          urls=[]
+          for f in out:
+              if f=='index.html': urls.append('https://net-elo.fr/')
+              elif f.endswith('.html'): urls.append('https://net-elo.fr/'+f)
+          if 'sitemap.xml' in out: urls.append('https://net-elo.fr/sitemap.xml')
+          urls=list(dict.fromkeys(urls))
+          print(json.dumps({'host':'net-elo.fr','key':os.environ['KEY'],'keyLocation':'https://net-elo.fr/'+os.environ['KEY']+'.txt','urlList':urls}))
+          PY
+          if python -c "import json; exit(0 if json.load(open('/tmp/payload.json'))['urlList'] else 1)"; then
+            curl --fail-with-body --retry 2 -H 'Content-Type: application/json; charset=utf-8' -d @/tmp/payload.json https://api.indexnow.org/indexnow
+          fi
