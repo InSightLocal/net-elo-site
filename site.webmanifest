@@ -10,7 +10,7 @@
     {
       "src": "/logo-net-elo.webp",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/webp",
       "purpose": "any"
     }
   ]

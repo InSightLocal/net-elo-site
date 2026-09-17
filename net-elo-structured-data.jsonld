@@ -7,8 +7,8 @@
       "name": "Net Elo",
       "alternateName": "Net Elo - Élodie Massin E.I.",
       "url": "https://net-elo.fr/",
-      "logo": "https://net-elo.fr/logo-net-elo.jpg",
-      "image": "https://net-elo.fr/logo-net-elo.jpg",
+      "logo": "https://net-elo.fr/logo-net-elo.webp",
+      "image": "https://net-elo.fr/logo-net-elo.webp",
       "telephone": "+33685759415",
       "email": "net.elo@icloud.com",
       "description": "Net Elo, Élodie Massin E.I., propose l’entretien régulier ou ponctuel du domicile et le lavage de vitres à Clermont dans l’Oise et aux alentours. Activité de services à la personne ouvrant droit, sous conditions, au crédit d’impôt de 50 %.",
@@ -19,10 +19,44 @@
         "addressRegion": "Oise",
         "addressCountry": "FR"
       },
-      "areaServed": {
-        "@type": "AdministrativeArea",
-        "name": "Clermont et alentours, Oise"
-      },
+      "areaServed": [
+        {
+          "@type": "City",
+          "name": "Clermont"
+        },
+        {
+          "@type": "City",
+          "name": "Fitz-James"
+        },
+        {
+          "@type": "City",
+          "name": "Agnetz"
+        },
+        {
+          "@type": "City",
+          "name": "Breuil-le-Sec"
+        },
+        {
+          "@type": "City",
+          "name": "Breuil-le-Vert"
+        },
+        {
+          "@type": "City",
+          "name": "Neuilly-sous-Clermont"
+        },
+        {
+          "@type": "City",
+          "name": "Bailleval"
+        },
+        {
+          "@type": "City",
+          "name": "Nointel"
+        },
+        {
+          "@type": "City",
+          "name": "Cambronne-lès-Clermont"
+        }
+      ],
       "priceRange": "25 € à 28 € / heure pour l’aide ménagère ; lavage de vitres dès 30 €",
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
@@ -36,7 +70,9 @@
               "name": "Aide ménagère à domicile",
               "serviceType": "Entretien régulier ou ponctuel du domicile",
               "url": "https://net-elo.fr/aide-menagere.html",
-              "provider": { "@id": "https://net-elo.fr/#business" },
+              "provider": {
+                "@id": "https://net-elo.fr/#business"
+              },
               "areaServed": "Clermont et alentours, Oise"
             }
           },
@@ -48,7 +84,9 @@
               "name": "Lavage de vitres à domicile",
               "serviceType": "Nettoyage et lavage de vitres à domicile",
               "url": "https://net-elo.fr/vitres.html",
-              "provider": { "@id": "https://net-elo.fr/#business" },
+              "provider": {
+                "@id": "https://net-elo.fr/#business"
+              },
               "areaServed": "Clermont et alentours, Oise"
             }
           }
@@ -60,7 +98,17 @@
         "Lavage de vitres",
         "Services à la personne",
         "Crédit d’impôt services à la personne"
-      ]
+      ],
+      "sameAs": [
+        "https://fairemescourses.fr/60-clermont/net-elo-menage-a-domicile/services-a-la-personne"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+33685759415",
+        "email": "net.elo@icloud.com",
+        "contactType": "customer service",
+        "availableLanguage": "fr"
+      }
     },
     {
       "@type": "WebSite",
@@ -68,7 +116,9 @@
       "url": "https://net-elo.fr/",
       "name": "Net Elo",
       "inLanguage": "fr-FR",
-      "publisher": { "@id": "https://net-elo.fr/#business" }
+      "publisher": {
+        "@id": "https://net-elo.fr/#business"
+      }
     }
   ]
 }
