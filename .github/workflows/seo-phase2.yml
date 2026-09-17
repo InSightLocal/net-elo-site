@@ -1,0 +1,86 @@
+name: SEO phase 2
+on:
+  push:
+    paths: ['.github/workflows/seo-phase2.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.x'}
+      - name: Optimize SEO
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re,json
+          towns=['Clermont','Fitz-James','Agnetz','Breuil-le-Sec','Breuil-le-Vert','Neuilly-sous-Clermont','Bailleval','Nointel','Cambronne-lès-Clermont']
+          # Fix social/logo references and improve image attributes.
+          for p in Path('.').glob('*.html'):
+              s=p.read_text(encoding='utf-8')
+              s=s.replace('https://net-elo.fr/logo-net-elo.jpg','https://net-elo.fr/logo-net-elo.webp')
+              s=s.replace('href="logo-net-elo.jpg"','href="logo-net-elo.webp"')
+              def img(m):
+                  tag=m.group(0)
+                  if 'alt=' not in tag:
+                      src=re.search(r'src=["\']([^"\']+)',tag)
+                      name=(src.group(1) if src else '').lower()
+                      alt='Net Elo'
+                      if 'aide-menagere' in name: alt='Illustration aide ménagère à domicile Net Elo'
+                      elif 'vitre' in name: alt='Illustration lavage de vitres à domicile Net Elo'
+                      elif 'sap' in name: alt='Services à la personne et crédit d’impôt'
+                      elif 'elodie' in name: alt='Élodie Massin – Net Elo'
+                      elif 'logo' in name: alt='Logo Net Elo'
+                      tag=tag[:-1]+' alt="'+alt+'">'
+                  if 'loading=' not in tag and 'brand-logo' not in tag: tag=tag[:-1]+' loading="lazy">'
+                  if 'decoding=' not in tag: tag=tag[:-1]+' decoding="async">'
+                  return tag
+              s=re.sub(r'<img\b[^>]*>',img,s,flags=re.I)
+              p.write_text(s,encoding='utf-8')
+          # Enhance canonical machine-readable entity file.
+          p=Path('net-elo-structured-data.jsonld'); d=json.loads(p.read_text(encoding='utf-8'))
+          b=d['@graph'][0]
+          b['logo']='https://net-elo.fr/logo-net-elo.webp'; b['image']='https://net-elo.fr/logo-net-elo.webp'
+          b['sameAs']=['https://fairemescourses.fr/60-clermont/net-elo-menage-a-domicile/services-a-la-personne']
+          b['contactPoint']={'@type':'ContactPoint','telephone':'+33685759415','email':'net.elo@icloud.com','contactType':'customer service','availableLanguage':'fr'}
+          b['areaServed']=[{'@type':'City','name':x} for x in towns]
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          # Synchronize sameAs/contact/logo in homepage LocalBusiness JSON-LD.
+          p=Path('index.html'); s=p.read_text(encoding='utf-8')
+          blocks=list(re.finditer(r'<script type="application/ld\+json">\s*(\{.*?\})\s*</script>',s,re.S))
+          for m in blocks:
+              try: data=json.loads(m.group(1))
+              except: continue
+              if data.get('@type')=='LocalBusiness':
+                  data['@id']='https://net-elo.fr/#business'; data['logo']='https://net-elo.fr/logo-net-elo.webp'; data['image']='https://net-elo.fr/logo-net-elo.webp'
+                  data['sameAs']=['https://fairemescourses.fr/60-clermont/net-elo-menage-a-domicile/services-a-la-personne']
+                  data['contactPoint']={'@type':'ContactPoint','telephone':'+33685759415','email':'net.elo@icloud.com','contactType':'customer service','availableLanguage':'fr'}
+                  data['areaServed']=[{'@type':'City','name':x} for x in towns]
+                  repl='<script type="application/ld+json">\n'+json.dumps(data,ensure_ascii=False,indent=2)+'\n</script>'
+                  s=s[:m.start()]+repl+s[m.end():]; break
+          p.write_text(s,encoding='utf-8')
+          # Correct Web App Manifest MIME declaration.
+          p=Path('site.webmanifest'); manifest=json.loads(p.read_text(encoding='utf-8')); manifest['icons'][0]['type']='image/webp'; p.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          # One useful local coverage page rather than doorway pages.
+          page='''<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zone d’intervention autour de Clermont (60) | Net Elo</title><meta name="description" content="Zone d’intervention Net Elo pour l’aide ménagère à domicile et le lavage de vitres autour de Clermont dans l’Oise."><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="https://net-elo.fr/secteur-intervention.html"><meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="Net Elo"><meta property="og:title" content="Zone d’intervention Net Elo autour de Clermont (60)"><meta property="og:description" content="Aide ménagère à domicile et lavage de vitres à Clermont et communes proches, selon disponibilités."><meta property="og:url" content="https://net-elo.fr/secteur-intervention.html"><meta property="og:image" content="https://net-elo.fr/logo-net-elo.webp"><link rel="icon" href="logo-net-elo.webp"><link rel="stylesheet" href="styles.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Service","@id":"https://net-elo.fr/secteur-intervention.html#service-area","name":"Zone d’intervention Net Elo","provider":{"@id":"https://net-elo.fr/#business"},"areaServed":AREA}</script></head><body><header class="site-header"><div class="wrap nav"><a class="brand" href="./"><img class="brand-logo" src="logo-net-elo.webp" alt="Logo Net Elo"><span><strong>Net Elo</strong><small>Élodie Massin E.I.</small></span></a><nav><a href="aide-menagere.html">Aide ménagère</a><a href="vitres.html">Vitres</a><a href="sap.html">Crédit d’impôt</a><a href="faq.html">FAQ</a></nav><a class="btn primary" href="contact.html">Contact</a></div></header><main><section class="page-hero"><div class="wrap page-hero-inner"><div class="kicker">Proximité · Clermont (Oise)</div><h1>Zone d’intervention de Net Elo</h1><p class="lead">Net Elo intervient pour l’entretien du domicile et le lavage de vitres à Clermont et dans plusieurs communes proches. La faisabilité d’une intervention dépend de l’adresse, de la prestation demandée et des disponibilités.</p></div></section><section class="section"><div class="wrap two-col"><div><h2>Clermont et communes proches</h2><p>Le secteur principal est organisé autour de Clermont (60600). Les communes habituellement couvertes comprennent :</p><ul class="plain-list"><li>Clermont</li><li>Fitz-James</li><li>Agnetz</li><li>Breuil-le-Sec</li><li>Breuil-le-Vert</li><li>Neuilly-sous-Clermont</li><li>Bailleval</li><li>Nointel</li><li>Cambronne-lès-Clermont</li></ul><p>Pour une adresse située à proximité mais non mentionnée, contacte Net Elo afin de vérifier directement la possibilité d’intervention.</p></div><aside class="info-panel"><h3>Prestations proposées</h3><p><strong>Aide ménagère régulière :</strong> 25 € / heure.</p><p><strong>Prestation ponctuelle :</strong> 28 € / heure.</p><p><strong>Lavage de vitres :</strong> à partir de 30 €, sur devis.</p><p>Les prestations éligibles réalisées dans le cadre des services à la personne peuvent ouvrir droit à un crédit d’impôt de 50 % sous les conditions réglementaires applicables.</p><a class="btn primary" href="contact.html">Vérifier mon adresse</a></aside></div></section><section class="section soft"><div class="wrap"><h2>Pourquoi une zone volontairement locale ?</h2><p class="page-intro">Net Elo privilégie un secteur de proximité autour de Clermont afin de limiter les déplacements et de conserver une organisation adaptée à une activité exercée personnellement par Élodie Massin.</p><div class="feature-grid"><div class="feature"><h3>Ménage régulier</h3><p>Entretien planifié du domicile selon les besoins définis avec le client.</p></div><div class="feature"><h3>Ménage ponctuel</h3><p>Intervention ponctuelle selon la demande et les disponibilités.</p></div><div class="feature"><h3>Vitres</h3><p>Lavage de vitres avec matériel professionnel, sur devis.</p></div><div class="feature"><h3>SAP</h3><p>Informations claires sur le cadre services à la personne et l’avantage fiscal.</p></div></div></div></section></main><footer><div class="wrap footer-grid"><div><strong>Net Elo — Élodie Massin E.I.</strong><p>Aide ménagère à domicile et lavage de vitres à Clermont et alentours.</p></div><div><a href="aide-menagere.html">Aide ménagère</a><br><a href="vitres.html">Vitres</a><br><a href="sap.html">Services à la personne</a></div><div><a href="contact.html">Contact</a><br><a href="faq.html">FAQ</a><br><a href="mentions-legales.html">Mentions légales</a></div></div><div class="wrap copy">© Net Elo — Élodie Massin E.I.</div></footer><script src="site-config.js"></script><script src="site.js"></script></body></html>'''
+          area=json.dumps([{'@type':'City','name':x} for x in towns],ensure_ascii=False)
+          Path('secteur-intervention.html').write_text(page.replace('AREA',area),encoding='utf-8')
+          # Sitemap + llms discoverability.
+          p=Path('sitemap.xml'); sm=p.read_text(encoding='utf-8')
+          if 'secteur-intervention.html' not in sm: sm=sm.replace('</urlset>','  <url><loc>https://net-elo.fr/secteur-intervention.html</loc><lastmod>2026-09-17</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>\n</urlset>')
+          p.write_text(sm,encoding='utf-8')
+          p=Path('llms.txt'); ll=p.read_text(encoding='utf-8')
+          if 'secteur-intervention.html' not in ll: ll=ll.replace('## Informations complémentaires','- Zone d’intervention : https://net-elo.fr/secteur-intervention.html\n\n## Informations complémentaires')
+          p.write_text(ll,encoding='utf-8')
+          PY
+      - name: Commit optimizations
+        run: |
+          git config user.name "Net Elo SEO automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add '*.html' sitemap.xml llms.txt site.webmanifest net-elo-structured-data.jsonld
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "SEO: local coverage, entity links and image optimization"
+          git push
