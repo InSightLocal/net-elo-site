@@ -77,3 +77,34 @@
   .service-showcase{padding-top:18px}
   .service-showcase img{border-radius:22px}
 }
+
+/* Contact flottant mobile — Net Elo */
+.mobile-contact{display:none}
+@media screen and (max-width:620px){
+  html{scroll-padding-bottom:calc(130px + env(safe-area-inset-bottom,0px))}
+  body{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+  .mobile-contact{
+    display:block;position:fixed;left:0;right:0;bottom:0;z-index:900;
+    padding:10px max(14px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));
+    border:1px solid var(--line);border-bottom:0;border-radius:26px 26px 0 0;
+    background:#fffaf6;box-shadow:0 -5px 28px rgba(85,35,28,.14)
+  }
+  .mobile-contact-label{margin:0 0 8px;text-align:center;font-size:.75rem;line-height:1.4;color:var(--ink)}
+  .mobile-contact-actions{display:grid;grid-template-columns:.9fr 1.1fr;gap:8px}
+  .mobile-contact-actions a{
+    display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;min-height:48px;
+    padding:11px 8px;border:1.5px solid var(--wine);border-radius:999px;
+    font-family:Georgia,"Times New Roman",serif;font-size:1rem;font-weight:700;line-height:1.2;text-align:center
+  }
+  .mobile-contact-call{background:var(--wine);color:#fff}
+  .mobile-contact-email{background:#fff;color:var(--wine)}
+  .mobile-contact-actions svg{width:22px;height:22px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .mobile-contact-actions a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+  .mobile-contact-call:hover{background:#570b0f}
+  .mobile-contact-email:hover{background:var(--soft)}
+  body:has(.cookie-banner:not([hidden])) .mobile-contact{display:none}
+}
+@media screen and (max-width:360px){
+  .mobile-contact-actions a{font-size:.875rem;gap:6px}
+  .mobile-contact-actions svg{width:19px;height:19px}
+}
