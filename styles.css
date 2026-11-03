@@ -108,3 +108,8 @@
   .mobile-contact-actions a{font-size:.875rem;gap:6px}
   .mobile-contact-actions svg{width:19px;height:19px}
 }
+
+/* Ajustement mobile : titre crédit d'impôt plus compact */
+@media(max-width:620px){
+  .sap-title-official strong{font-size:1.28rem;line-height:1.18}
+}
