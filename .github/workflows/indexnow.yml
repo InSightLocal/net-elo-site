@@ -25,7 +25,7 @@ jobs:
           urls=[]
           for f in out:
               if f=='index.html': urls.append('https://net-elo.fr/')
-              elif f.endswith('.html'): urls.append('https://net-elo.fr/'+f)
+              elif f.endswith('.html') and f not in ('404.html','cookies.html','confidentialite.html'): urls.append('https://net-elo.fr/'+f)
           if 'sitemap.xml' in out: urls.append('https://net-elo.fr/sitemap.xml')
           urls=list(dict.fromkeys(urls))
           print(json.dumps({'host':'net-elo.fr','key':os.environ['KEY'],'keyLocation':'https://net-elo.fr/'+os.environ['KEY']+'.txt','urlList':urls}))

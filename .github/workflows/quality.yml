@@ -1,0 +1,26 @@
+name: Net Elo — qualité du site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.html'
+      - '*.css'
+      - 'site.js'
+      - 'sitemap.xml'
+      - 'net-elo-structured-data.jsonld'
+      - '.github/workflows/quality.yml'
+      - 'scripts/site_check.py'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JavaScript syntax
+        run: node --check site.js
+      - name: Check links, SEO metadata and structure
+        run: python3 scripts/site_check.py
