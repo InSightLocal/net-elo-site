@@ -1,0 +1,46 @@
+name: Optimize Net Elo hero illustration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/prepare-site-assets.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  optimize-hero:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Prepare image optimizer
+        run: python3 -m pip install --disable-pip-version-check Pillow
+      - name: Localize and optimize the existing hero photo
+        run: |
+          curl --location --fail --show-error --retry 2 --max-time 45 \
+            'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80' \
+            --output /tmp/net-elo-hero-original
+          python3 - <<'PY'
+          from PIL import Image, ImageOps
+          image = Image.open('/tmp/net-elo-hero-original').convert('RGB')
+          large = ImageOps.fit(image, (1000, 780), method=Image.Resampling.LANCZOS)
+          large.save('hero-interieur.webp', 'WEBP', quality=78, method=6)
+          small = ImageOps.fit(image, (600, 460), method=Image.Resampling.LANCZOS)
+          small.save('hero-interieur-mobile.webp', 'WEBP', quality=76, method=6)
+          for name in ('hero-interieur.webp','hero-interieur-mobile.webp'):
+              import os
+              print(name, os.path.getsize(name), 'bytes')
+          PY
+      - name: Publish generated image files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add hero-interieur.webp hero-interieur-mobile.webp
+          if ! git diff --cached --quiet; then
+            git commit -m "Optimize and self-host the existing Net Elo home illustration"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
