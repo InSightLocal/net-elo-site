@@ -17,6 +17,23 @@ KNOWN_INDEXABLE = {
 }
 failures = []
 
+# Security invariants for this intentionally static GitHub Pages site.
+for path in [*ROOT.rglob("*.php"), ROOT / "composer.json", ROOT / "composer.lock"]:
+    if path.exists(): failures.append(f"Fichier serveur inattendu : {path.relative_to(ROOT)}")
+if (ROOT / "vendor").exists(): failures.append("Dossier vendor inattendu sur un site statique")
+
+dangerous_js = {
+    r"\\beval\\s*\\(": "eval()",
+    r"\\bnew\\s+Function\\s*\\(": "new Function()",
+    r"document\\.write\\s*\\(": "document.write()",
+    r"\\.innerHTML\\s*=": "affectation innerHTML",
+}
+for js_path in ROOT.glob("*.js"):
+    source = js_path.read_text(encoding="utf-8")
+    for pattern, label in dangerous_js.items():
+        if re.search(pattern, source, re.I):
+            failures.append(f"{js_path.name}: construction JavaScript interdite ({label})")
+
 class Page(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -56,6 +73,9 @@ for path in HTMLS:
     page = Page()
     page.feed(html)
     parsed[path.name] = page
+    if re.search(r"javascript\\s*:", html, re.I): failures.append(f"{path.name}: URL javascript: interdite")
+    if re.search(r"\\son[a-z]+\\s*=", html, re.I): failures.append(f"{path.name}: gestionnaire événement inline interdit")
+    if re.search(r"(?:src|href)=[\\\"\\\']http://", html, re.I): failures.append(f"{path.name}: ressource HTTP non chiffrée")
     if page.h1 != 1: failures.append(f"{path.name}: {page.h1} H1")
     if page.main != 1: failures.append(f"{path.name}: {page.main} main")
     if path.name != "404.html" and ("menu-toggle" not in page.ids or "site-navigation" not in page.ids):
@@ -104,6 +124,22 @@ try:
     if not data.get("@graph"): failures.append("Données structurées globales vides")
 except Exception as exc:
     failures.append(f"Données structurées globales invalides : {exc}")
+
+# Guard against reintroduction of retired prices and obsolete generators.
+business_sources = [
+    ROOT / "index.html", ROOT / "aide-menagere.html", ROOT / "vitres.html",
+    ROOT / "faq.html", ROOT / "contact.html", ROOT / "secteur-intervention.html",
+    ROOT / "llms.txt", ROOT / "net-elo-structured-data.jsonld",
+]
+joined = "\\n".join(p.read_text(encoding="utf-8") for p in business_sources if p.exists())
+if re.search(r"28\\s*€|\\\"price\\\"\\s*:\\s*\\\"28\\\"", joined): failures.append("Ancien tarif 28 € détecté")
+if re.search(r"(?:lavage de vitres|vitres)[^\\n]{0,100}(?:à partir de|dès)\\s*30\\s*€", joined, re.I): failures.append("Ancien tarif vitres 30 € détecté")
+for retired in (
+    ".github/workflows/integrate-structured-data.yml",
+    ".github/workflows/prepare-site-assets.yml",
+    ".github/workflows/seo-phase2.yml",
+):
+    if (ROOT / retired).exists(): failures.append(f"Workflow obsolète encore présent : {retired}")
 
 if failures:
     print("\n".join("ERREUR — " + x for x in failures))
