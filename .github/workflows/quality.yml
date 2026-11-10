@@ -1,4 +1,4 @@
-name: Net Elo — qualité du site
+name: Net Elo — qualité et sécurité du site
 
 on:
   push:
@@ -6,21 +6,33 @@ on:
     paths:
       - '*.html'
       - '*.css'
-      - 'site.js'
-      - 'sitemap.xml'
-      - 'net-elo-structured-data.jsonld'
+      - '*.js'
+      - '*.xml'
+      - '*.json'
+      - '*.jsonld'
+      - '*.webmanifest'
       - '.github/workflows/quality.yml'
       - 'scripts/site_check.py'
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
 
+concurrency:
+  group: net-elo-quality-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
       - name: Check JavaScript syntax
         run: node --check site.js
-      - name: Check links, SEO metadata and structure
+      - name: Check links, SEO metadata and security invariants
         run: python3 scripts/site_check.py
