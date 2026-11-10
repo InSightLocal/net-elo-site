@@ -14,23 +14,23 @@ Pages de transparence : `mentions-legales.html`, `confidentialite.html`, `cookie
 - Formulaire de devis sur `contact.html` : prépare un **courriel à envoyer volontairement** ou copie le texte. Il n'envoie pas automatiquement une demande à un serveur.
 - Google Analytics 4 est chargé **uniquement après consentement** (script `site.js` / identifiant `site-config.js`). Les préférences sont accessibles via `cookies.html`. Ne pas installer de nouveaux traceurs sans revoir les informations RGPD.
 - Bandeau mobile appel/devis conservé.
-- Tarifs indiqués à titre commercial selon devis : ménage régulier 25 €/h, ponctuel 28 €/h, vitres dès 30 €. Crédit d’impôt SAP 50 % **sous conditions** ; ne pas promettre l'avance immédiate comme systématique.
+- Tarifs indiqués à titre commercial selon devis : 25 €/h à Clermont et alentours proches ; 30 €/h hors secteur proche lorsque l’intervention est réalisable ; majoration de 5 €/h les jours fériés ; lavage de vitres minimum 50 € sur devis. Crédit d’impôt SAP 50 % **sous conditions** ; ne pas promettre l'avance immédiate comme systématique.
 
 ## Performances
 
 - Logo et photographies de prestations : fichiers WebP déjà présents à la racine.
-- Accueil : `hero-interieur.webp` (ordinateur) et `hero-interieur-mobile.webp` (mobile), générés à partir de l’illustration d’accueil antérieure par `.github/workflows/prepare-site-assets.yml`.
+- Accueil : `hero-interieur.webp` (ordinateur) et `hero-interieur-mobile.webp` (mobile), stockés directement dans le dépôt.
 - Source distante retirée du CSS.
 - `width` / `height` sur les images pour limiter les décalages.
 - Ne pas annoncer de score PageSpeed ou Core Web Vitals sans mesure externe.
 
 ## Vérification et publication
 
-La GitHub Action `.github/workflows/quality.yml` vérifie la syntaxe JS et lance `scripts/site_check.py` sur les liens, titres, images, canoniques, sitemap et données structurées.
+La GitHub Action `.github/workflows/quality.yml` vérifie la syntaxe JS et lance `scripts/site_check.py` sur les liens, titres, images, canoniques, sitemap, données structurées et invariants de sécurité du site statique. PHP/Composer/vendor et plusieurs constructions JavaScript dangereuses sont explicitement interdits.
 
 Une modification du contenu doit être contrôlée dans l'action **pages build and deployment**. Le sitemap et les dates `lastmod` doivent être mis à jour pour les changements significatifs. `.github/workflows/indexnow.yml` informe IndexNow des pages modifiées, mais l'indexation effective n'est jamais garantie.
 
-Les anciens workflows `seo-phase2.yml` et `integrate-structured-data.yml` sont des scripts historiques, pouvant réécrire certains fichiers s’ils sont déclenchés manuellement : ne pas les relancer sans auditer leurs effets.
+Les anciens générateurs SEO et d’assets ont été supprimés. Le dépôt ne conserve que les automatisations nécessaires à la validation qualité/sécurité et à IndexNow.
 
 ## Données à vérifier par l'exploitante
 
