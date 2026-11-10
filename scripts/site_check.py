@@ -23,10 +23,10 @@ for path in [*ROOT.rglob("*.php"), ROOT / "composer.json", ROOT / "composer.lock
 if (ROOT / "vendor").exists(): failures.append("Dossier vendor inattendu sur un site statique")
 
 dangerous_js = {
-    r"\\beval\\s*\\(": "eval()",
-    r"\\bnew\\s+Function\\s*\\(": "new Function()",
-    r"document\\.write\\s*\\(": "document.write()",
-    r"\\.innerHTML\\s*=": "affectation innerHTML",
+    r"\beval\s*\(": "eval()",
+    r"\bnew\s+Function\s*\(": "new Function()",
+    r"document\.write\s*\(": "document.write()",
+    r"\.innerHTML\s*=": "affectation innerHTML",
 }
 for js_path in ROOT.glob("*.js"):
     source = js_path.read_text(encoding="utf-8")
@@ -73,8 +73,8 @@ for path in HTMLS:
     page = Page()
     page.feed(html)
     parsed[path.name] = page
-    if re.search(r"javascript\\s*:", html, re.I): failures.append(f"{path.name}: URL javascript: interdite")
-    if re.search(r"\\son[a-z]+\\s*=", html, re.I): failures.append(f"{path.name}: gestionnaire événement inline interdit")
+    if re.search(r"javascript\s*:", html, re.I): failures.append(f"{path.name}: URL javascript: interdite")
+    if re.search(r"\son[a-z]+\s*=", html, re.I): failures.append(f"{path.name}: gestionnaire événement inline interdit")
     if re.search(r"(?:src|href)=[\\\"\\\']http://", html, re.I): failures.append(f"{path.name}: ressource HTTP non chiffrée")
     if page.h1 != 1: failures.append(f"{path.name}: {page.h1} H1")
     if page.main != 1: failures.append(f"{path.name}: {page.main} main")
@@ -131,9 +131,9 @@ business_sources = [
     ROOT / "faq.html", ROOT / "contact.html", ROOT / "secteur-intervention.html",
     ROOT / "llms.txt", ROOT / "net-elo-structured-data.jsonld",
 ]
-joined = "\\n".join(p.read_text(encoding="utf-8") for p in business_sources if p.exists())
-if re.search(r"28\\s*€|\\\"price\\\"\\s*:\\s*\\\"28\\\"", joined): failures.append("Ancien tarif 28 € détecté")
-if re.search(r"(?:lavage de vitres|vitres)[^\\n]{0,100}(?:à partir de|dès)\\s*30\\s*€", joined, re.I): failures.append("Ancien tarif vitres 30 € détecté")
+joined = "\n".join(p.read_text(encoding="utf-8") for p in business_sources if p.exists())
+if re.search(r'28\s*€|"price"\s*:\s*"28"', joined): failures.append("Ancien tarif 28 € détecté")
+if re.search(r"(?:lavage de vitres|vitres)[^\n]{0,100}(?:à partir de|dès)\s*30\s*€", joined, re.I): failures.append("Ancien tarif vitres 30 € détecté")
 for retired in (
     ".github/workflows/integrate-structured-data.yml",
     ".github/workflows/prepare-site-assets.yml",
